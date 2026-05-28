@@ -435,8 +435,14 @@ let currentEditTarget = null;
 const correctPwd = "13112708075";
 const defaultHtml = "<p>软件介绍、功能说明、安装步骤等文字内容</p>";
 
+// 初始数据，保证页面不会空屏
 let appData = {
-  cards: [],
+  cards: [
+    { category: "design", name: "Adobe Photoshop", img: "https://picsum.photos/200/200", desc: "专业图像编辑软件", link: "xxxx", html: "" },
+    { category: "design", name: "Adobe Illustrator", img: "https://picsum.photos/200/201", desc: "矢量图形设计工具", link: "xxxx", html: "" },
+    { category: "develop", name: "VS Code", img: "https://picsum.photos/200/202", desc: "轻量强大代码编辑器", link: "暂无", html: "" },
+    { category: "tool", name: "解压工具", img: "https://picsum.photos/200/203", desc: "常用压缩解压软件", link: "xxxx", html: "" }
+  ],
   categories: [
     { id: "design", name: "设计类" },
     { id: "develop", name: "开发类" },
@@ -450,31 +456,22 @@ window.addEventListener('load', async () => {
   bindEvents();
 });
 
+// 从 GitHub Issue 加载数据，失败时用初始数据兜底
 async function loadFromGitHub() {
   try {
     const res = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues/${GITHUB_CONFIG.issueNumber}`, {
       headers: { Authorization: `token ${GITHUB_CONFIG.token}` }
     });
     const issue = await res.json();
-    if (issue.body) appData = JSON.parse(issue.body);
+    if (issue.body && issue.body.trim()) {
+      appData = JSON.parse(issue.body);
+    }
   } catch (e) {
-    // 如果加载失败，用默认数据
-    appData = {
-      cards: [
-        { category: "design", name: "Adobe Photoshop", img: "https://picsum.photos/200/200", desc: "专业图像编辑软件", link: "xxxx", html: "" },
-        { category: "design", name: "Adobe Illustrator", img: "https://picsum.photos/200/201", desc: "矢量图形设计工具", link: "xxxx", html: "" },
-        { category: "develop", name: "VS Code", img: "https://picsum.photos/200/202", desc: "轻量强大代码编辑器", link: "暂无", html: "" },
-        { category: "tool", name: "解压工具", img: "https://picsum.photos/200/203", desc: "常用压缩解压软件", link: "xxxx", html: "" }
-      ],
-      categories: [
-        { id: "design", name: "设计类" },
-        { id: "develop", name: "开发类" },
-        { id: "tool", name: "工具类" }
-      ]
-    };
+    console.error("云端加载失败，使用本地初始数据", e);
   }
 }
 
+// 保存数据到 GitHub Issue
 async function saveToGitHub() {
   try {
     await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues/${GITHUB_CONFIG.issueNumber}`, {
@@ -487,10 +484,11 @@ async function saveToGitHub() {
     });
     alert("✅ 已保存到云端");
   } catch (e) {
-    alert("❌ 保存失败");
+    alert("❌ 云端保存失败");
   }
 }
 
+// 渲染所有卡片
 function renderAll() {
   document.querySelectorAll('.content').forEach(el => el.innerHTML = '');
   appData.categories.forEach(cat => {
@@ -523,6 +521,7 @@ function renderAll() {
   });
 }
 
+// 绑定所有事件
 function bindEvents() {
   const editBtn = document.getElementById('editBtn');
   editBtn.onclick = async () => {
@@ -537,6 +536,7 @@ function bindEvents() {
     }
   };
 
+  // 新增/删除卡片事件
   document.addEventListener('click', async (e) => {
     const card = e.target.closest('.card');
     if (!card) return;
@@ -564,6 +564,7 @@ function bindEvents() {
   });
 }
 
+// 管理员验证
 function checkAdmin() {
   const pwd = document.getElementById('adminPwd').value.trim();
   if (pwd === correctPwd) {
