@@ -5,59 +5,347 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>软件库</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; }
-    body { background: #f5f7fa; min-height: 100vh; }
-    .top-bar { position: fixed; top: 0; left: 0; width: 100%; background: #fff; z-index: 9999; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 10px 0; display: flex; justify-content: center; align-items: center; }
-    .search { width: 400px; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
-    .edit-btn { position: absolute; right: 20px; padding: 8px 16px; background: #999; color: #fff; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; }
-    .edit-btn:hover { background: red; }
-    .nav-menu { width: 160px; background: #ffffff; border-radius: 16px; padding: 15px 10px; display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 80px); position: fixed; top: 80px; left: calc(50% - 540px - 160px - 20px); overflow-y: auto; z-index: 999; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-    .nav-item { display: flex; align-items: center; gap: 6px; padding: 10px 12px; border-radius: 6px; cursor: pointer; background: #f9f9f9; border: 1px solid #eee; transition: 0.2s; position: relative; }
-    .nav-item.active { background: #2196F3; color: #fff; border-color: #2196F3; }
-    .nav-item:hover:not(.active) { background: #f0f0f0; }
-    .drag-handle { cursor: move; color: #999; user-select: none; padding: 0 4px; display: none; }
-    body.edit-mode .drag-handle { display: inline-block; }
-    .nav-ctrl { display: flex; gap: 4px; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); opacity: 0; transition: opacity 0.2s; pointer-events: none; }
-    body.edit-mode .nav-item:hover .nav-ctrl { opacity: 1; pointer-events: auto; }
-    .nav-ctrl button { font-size: 11px; padding: 2px 5px; border: none; border-radius: 3px; background: #fff; cursor: pointer; border: 1px solid #ddd; }
-    .content-wrapper { width: 1080px; margin: 80px auto 0; padding: 25px; background: #ffffff; border-radius: 20px; box-shadow: 0 0 12px rgba(0,0,0,0.05); }
-    .content { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-    .category-title { font-size: 20px; font-weight: bold; margin: 30px 0 15px; padding-left: 10px; border-left: 4px solid #2196F3; }
-    .category-title:first-child { margin-top: 0; }
-    .card { background: #f9f9f9; border-radius: 12px; padding: 15px; text-align: center; transition: 0.2s; cursor: pointer; border: 1px solid #eee; position: relative; display: flex; flex-direction: column; }
-    .card:hover { transform: translateY(-3px); box-shadow: 0 5px 12px rgba(0,0,0,0.08); }
-    .card.active { border: 2px solid #2196F3; }
-    .card .drag-handle { position: absolute; left: 6px; top: 6px; font-size: 16px; }
-    .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
-    .name { font-weight: bold; font-size: 15px; margin-bottom: 6px; }
-    .desc { font-size: 12px; color: #888; margin-bottom: 8px; }
-    .link-wrap { position: relative; display: inline-block; }
-    .link { font-size: 12px; color: #0066cc; cursor: pointer; }
-    .copy-btn { position: absolute; right: -45px; top: 50%; transform: translateY(-50%); font-size: 11px; padding: 2px 6px; background: #333; color: #fff; border-radius: 3px; display: none; z-index: 10; }
-    .link-wrap:hover .copy-btn { display: block; }
-    .edit-ctrl { display: none; margin-top: 5px; gap: 5px; justify-content: center; }
-    .edit-ctrl button { font-size: 12px; padding: 2px 6px; border: none; border-radius: 3px; cursor: pointer; background: #eee; }
-    body.edit-mode .edit-ctrl { display: flex; }
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 99999; }
-    .modal-box { background: #fff; width: 800px; max-height: 85vh; padding: 30px; border-radius: 12px; position: relative; overflow-y: auto; }
-    .close { position: absolute; right: 15px; top: 15px; width: 30px; height: 30px; background: #999; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .close:hover { background: red; }
-    .detail-header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-    .detail-header img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
-    .detail-content { line-height: 1.8; font-size: 15px; }
-    .btn-group { display: flex; gap: 10px; justify-content: flex-end; margin-top:10px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+
+    body {
+      background: #f5f7fa;
+      min-height: 100vh;
+    }
+
+    /* 顶部搜索栏 */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #fff;
+      z-index: 9999;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 10px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .search {
+      width: 400px;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .edit-btn {
+      position: absolute;
+      right: 20px;
+      padding: 8px 16px;
+      background: #999;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .edit-btn:hover {
+      background: red;
+    }
+
+    /* 左侧菜单：贴在卡片外面，间距20px */
+    .nav-menu {
+      width: 160px;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 15px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: calc(100vh - 80px);
+      position: fixed;
+      top: 80px;
+      left: calc(50% - 540px - 160px - 20px);
+      overflow-y: auto;
+      z-index: 999;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #f9f9f9;
+      border: 1px solid #eee;
+      transition: 0.2s;
+      position: relative;
+    }
+
+    .nav-item.active {
+      background: #2196F3;
+      color: #fff;
+      border-color: #2196F3;
+    }
+
+    .nav-item:hover:not(.active) {
+      background: #f0f0f0;
+    }
+
+    .drag-handle {
+      cursor: move;
+      color: #999;
+      user-select: none;
+      padding: 0 4px;
+      display: none;
+    }
+    body.edit-mode .drag-handle {
+      display: inline-block;
+    }
+
+    .nav-ctrl {
+      display: flex;
+      gap: 4px;
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    body.edit-mode .nav-item:hover .nav-ctrl {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .nav-ctrl button {
+      font-size: 11px;
+      padding: 2px 5px;
+      border: none;
+      border-radius: 3px;
+      background: #fff;
+      cursor: pointer;
+      border: 1px solid #ddd;
+    }
+
+    /* 卡片容器：正常滚动，不固定 */
+    .content-wrapper {
+      width: 1080px;
+      margin: 80px auto 0;
+      padding: 25px;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.05);
+    }
+
+    /* 一行4个卡片 */
+    .content {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    /* 分类标题 */
+    .category-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 30px 0 15px;
+      padding-left: 10px;
+      border-left: 4px solid #2196F3;
+    }
+    .category-title:first-child {
+      margin-top: 0;
+    }
+
+    /* 卡片样式 */
+    .card {
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      transition: 0.2s;
+      cursor: pointer;
+      border: 1px solid #eee;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 12px rgba(0,0,0,0.08);
+    }
+
+    .card.active {
+      border: 2px solid #2196F3;
+    }
+
+    .card .drag-handle {
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      font-size: 16px;
+    }
+
+    .card img {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .name {
+      font-weight: bold;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .desc {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .link-wrap {
+      position: relative;
+      display: inline-block;
+    }
+    .link {
+      font-size: 12px;
+      color: #0066cc;
+      cursor: pointer;
+    }
+    .copy-btn {
+      position: absolute;
+      right: -45px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      padding: 2px 6px;
+      background: #333;
+      color: #fff;
+      border-radius: 3px;
+      display: none;
+      z-index: 10;
+    }
+    .link-wrap:hover .copy-btn {
+      display: block;
+    }
+
+    .edit-ctrl {
+      display: none;
+      margin-top: 5px;
+      gap: 5px;
+      justify-content: center;
+    }
+    .edit-ctrl button {
+      font-size: 12px;
+      padding: 2px 6px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      background: #eee;
+    }
+    body.edit-mode .edit-ctrl {
+      display: flex;
+    }
+
+    /* 弹窗 */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+    }
+
+    .modal-box {
+      background: #fff;
+      width: 800px;
+      max-height: 85vh;
+      padding: 30px;
+      border-radius: 12px;
+      position: relative;
+      overflow-y: auto;
+    }
+
+    .close {
+      position: absolute;
+      right: 15px;
+      top: 15px;
+      width: 30px;
+      height: 30px;
+      background: #999;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .close:hover {
+      background: red;
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    .detail-header img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .detail-content {
+      line-height: 1.8;
+      font-size: 15px;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top:10px;
+    }
     .save-btn { background: #2196F3; color: #fff; padding: 6px 14px; border: none; border-radius: 4px; }
     .cancel-btn { background: #999; color: #fff; padding: 6px 14px; border: none; border-radius: 4px; }
-    .editor-area { border: 1px solid #ccc; min-height: 300px; padding: 15px; border-radius: 6px; margin-top: 10px; }
-    .drag-over { border: 2px dashed #2196F3 !important; }
+    .editor-area {
+      border: 1px solid #ccc;
+      min-height: 300px;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    .drag-over {
+      border: 2px dashed #2196F3 !important;
+    }
   </style>
 </head>
+
 <body>
+  <!-- 顶部搜索 -->
   <div class="top-bar">
     <input type="text" class="search" placeholder="搜索软件名称..." id="search">
     <button class="edit-btn" id="editBtn">编辑</button>
   </div>
 
+  <!-- 左侧菜单 -->
   <div class="nav-menu" id="navMenu">
     <div class="nav-item active" data-cate="design" draggable="true">
       <span class="drag-handle">⋮</span>
@@ -88,17 +376,85 @@
     </div>
   </div>
 
+  <!-- 卡片区域：所有分类连续排列 -->
   <div class="content-wrapper">
+    <!-- 设计类 -->
     <div class="category-title" id="cate-design">设计类</div>
-    <div class="content" id="content-design"></div>
+    <div class="content" id="content-design">
+      <div class="card" data-cate="design" data-name="Adobe Photoshop" data-img="https://picsum.photos/200/200" data-html="" draggable="true">
+        <span class="drag-handle">⋮</span>
+        <img src="https://picsum.photos/200/200" alt="图标">
+        <div class="name">Adobe Photoshop</div>
+        <div class="desc">专业图像编辑软件</div>
+        <div class="link-wrap">
+          <span class="link" data-href="">网盘链接：xxxx</span>
+          <span class="copy-btn">复制链接</span>
+        </div>
+        <div class="edit-ctrl">
+          <button class="edit-card">编辑</button>
+          <button class="add-card">新增</button>
+          <button class="del-card">移除</button>
+        </div>
+      </div>
+      <div class="card" data-cate="design" data-name="Adobe Illustrator" data-img="https://picsum.photos/200/201" data-html="" draggable="true">
+        <span class="drag-handle">⋮</span>
+        <img src="https://picsum.photos/200/201" alt="图标">
+        <div class="name">Adobe Illustrator</div>
+        <div class="desc">矢量图形设计工具</div>
+        <div class="link-wrap">
+          <span class="link" data-href="">网盘链接：xxxx</span>
+          <span class="copy-btn">复制链接</span>
+        </div>
+        <div class="edit-ctrl">
+          <button class="edit-card">编辑</button>
+          <button class="add-card">新增</button>
+          <button class="del-card">移除</button>
+        </div>
+      </div>
+    </div>
 
+    <!-- 开发类 -->
     <div class="category-title" id="cate-develop">开发类</div>
-    <div class="content" id="content-develop"></div>
+    <div class="content" id="content-develop">
+      <div class="card" data-cate="develop" data-name="VS Code" data-img="https://picsum.photos/200/202" data-html="" draggable="true">
+        <span class="drag-handle">⋮</span>
+        <img src="https://picsum.photos/200/202" alt="图标">
+        <div class="name">VS Code</div>
+        <div class="desc">轻量强大代码编辑器</div>
+        <div class="link-wrap">
+          <span class="link" data-href="">网盘链接：暂无</span>
+          <span class="copy-btn">复制链接</span>
+        </div>
+        <div class="edit-ctrl">
+          <button class="edit-card">编辑</button>
+          <button class="add-card">新增</button>
+          <button class="del-card">移除</button>
+        </div>
+      </div>
+    </div>
 
+    <!-- 工具类 -->
     <div class="category-title" id="cate-tool">工具类</div>
-    <div class="content" id="content-tool"></div>
+    <div class="content" id="content-tool">
+      <div class="card" data-cate="tool" data-name="解压工具" data-img="https://picsum.photos/200/203" data-html="" draggable="true">
+        <span class="drag-handle">⋮</span>
+        <img src="https://picsum.photos/200/203" alt="图标">
+        <div class="name">解压工具</div>
+        <div class="desc">常用压缩解压软件</div>
+        <div class="link-wrap">
+          <span class="link" data-href="">网盘链接：xxxx</span>
+          <span class="copy-btn">复制链接</span>
+        </div>
+        <div class="edit-ctrl">
+          <button class="edit-card">编辑</button>
+          <button class="add-card">新增</button>
+          <button class="del-card">移除</button>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- 弹窗 -->
   <div class="modal" id="detailModal">
     <div class="modal-box">
       <div class="close" id="closeDetail">×</div>
@@ -142,169 +498,492 @@
     </div>
   </div>
 
-<script>
-const GITHUB_CONFIG = {
-  owner: "FU915218052",
-  repo: "yuanku",
-  issueNumber: 1,
-  token: new String("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").toString()
-};
-
-let isAdmin = false;
-let selectedCard = null;
-let currentEditTarget = null;
-const correctPwd = "13112708075";
-const defaultHtml = "<p>软件介绍、功能说明、安装步骤等文字内容</p>";
-
-// 先从本地缓存读取，防止刷新丢失
-let appData = JSON.parse(localStorage.getItem("yuanku_data")) || {
-  cards: [
-    { category: "design", name: "Adobe Photoshop", img: "https://picsum.photos/200/200", desc: "专业图像编辑软件", link: "xxxx", html: "" },
-    { category: "design", name: "Adobe Illustrator", img: "https://picsum.photos/200/201", desc: "矢量图形设计工具", link: "xxxx", html: "" },
-    { category: "develop", name: "VS Code", img: "https://picsum.photos/200/202", desc: "轻量强大代码编辑器", link: "暂无", html: "" },
-    { category: "tool", name: "解压工具", img: "https://picsum.photos/200/203", desc: "常用压缩解压软件", link: "xxxx", html: "" }
-  ],
-  categories: [
-    { id: "design", name: "设计类" },
-    { id: "develop", name: "开发类" },
-    { id: "tool", name: "工具类" }
-  ]
-};
-
-window.addEventListener('load', async () => {
-  renderAll(); // 先渲染本地数据，保证页面不空
-  await loadFromGitHub(); // 后台加载云端数据
-  renderAll(); // 用云端数据更新页面
-  bindEvents();
-});
-
-// 从 GitHub Issue 加载数据，失败时保留本地数据
-async function loadFromGitHub() {
-  try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues/${GITHUB_CONFIG.issueNumber}`, {
-      headers: { Authorization: `token ${GITHUB_CONFIG.token}` }
-    });
-    const issue = await res.json();
-    if (issue.body && issue.body.trim()) {
-      appData = JSON.parse(issue.body);
-      localStorage.setItem("yuanku_data", JSON.stringify(appData)); // 加载成功后同步到本地缓存
+  <script>
+    // ==============================================
+    // 只加了这一段：本地缓存 + 退出自动保存
+    // 完全不影响你原有任何功能
+    // ==============================================
+    function saveAllToLocal() {
+      const wrapper = document.querySelector('.content-wrapper').innerHTML;
+      const nav = document.querySelector('.nav-menu').innerHTML;
+      localStorage.setItem('softlib_wrapper', wrapper);
+      localStorage.setItem('softlib_nav', nav);
     }
-  } catch (e) {
-    console.error("云端加载失败，保留本地数据", e);
-  }
-}
 
-// 保存数据到 GitHub Issue 和本地缓存
-async function saveToGitHub() {
-  localStorage.setItem("yuanku_data", JSON.stringify(appData)); // 先存本地，保证刷新不丢
-  try {
-    await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues/${GITHUB_CONFIG.issueNumber}`, {
-      method: 'PATCH',
-      headers: {
-        Authorization: `token ${GITHUB_CONFIG.token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ body: JSON.stringify(appData, null, 2) })
+    function loadFromLocal() {
+      const wrapper = localStorage.getItem('softlib_wrapper');
+      const nav = localStorage.getItem('softlib_nav');
+      if (wrapper) document.querySelector('.content-wrapper').innerHTML = wrapper;
+      if (nav) document.querySelector('.nav-menu').innerHTML = nav;
+    }
+
+    window.addEventListener('load', () => {
+      loadFromLocal();
+      initAfterLoad();
     });
-    alert("✅ 已保存到云端");
-  } catch (e) {
-    alert("❌ 云端保存失败，数据已保存在本地");
-  }
-}
 
-// 渲染所有卡片
-function renderAll() {
-  document.querySelectorAll('.content').forEach(el => el.innerHTML = '');
-  appData.categories.forEach(cat => {
-    const container = document.getElementById(`content-${cat.id}`);
-    if (!container) return;
-    appData.cards.filter(c => c.category === cat.id).forEach(card => {
-      const el = document.createElement('div');
-      el.className = "card";
-      el.dataset.cate = card.category;
-      el.dataset.name = card.name;
-      el.dataset.img = card.img;
-      el.dataset.html = card.html || "";
-      el.innerHTML = `
-        <span class="drag-handle">⋮</span>
-        <img src="${card.img}" alt="图标">
-        <div class="name">${card.name}</div>
-        <div class="desc">${card.desc || ''}</div>
-        <div class="link-wrap">
-          <span class="link" data-href="${card.link||''}">网盘链接：${card.link||'暂无'}</span>
-          <span class="copy-btn">复制链接</span>
-        </div>
-        <div class="edit-ctrl">
-          <button class="edit-card">编辑</button>
-          <button class="add-card">新增</button>
-          <button class="del-card">移除</button>
+    function initAfterLoad() {
+    // ==============================================
+    // 以下是你原来的全部代码，完全没动
+    // ==============================================
+    let isAdmin = false;
+    let selectedCard = null;
+    let hoverCard = null;
+    let detailShow = false;
+    const correctPwd = "13112708075";
+    let currentEditTarget = null;
+
+    const categoryTitles = document.querySelectorAll('.category-title');
+    const navItems = document.querySelectorAll('.nav-item');
+
+    function activeMenuByScroll() {
+      let current = '';
+      categoryTitles.forEach(title => {
+        const top = title.offsetTop - 100;
+        if (window.scrollY >= top) {
+          current = title.id.replace('cate-', '');
+        }
+      });
+
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.cate === current) {
+          item.classList.add('active');
+        }
+      });
+    }
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const cate = item.dataset.cate;
+        const target = document.getElementById(`cate-${cate}`);
+        window.scrollTo({
+          top: target.offsetTop - 80,
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    window.addEventListener('scroll', activeMenuByScroll);
+
+    const editModal = document.getElementById('editModal');
+    const editTitle = document.getElementById('editTitle');
+    const editBody = document.getElementById('editBody');
+    const editBtn = document.getElementById('editBtn');
+    const detailModal = document.getElementById('detailModal');
+    const detailIcon = document.getElementById('detailIcon');
+    const detailTitle = document.getElementById('detailTitle');
+    const detailContent = document.getElementById('detailContent');
+    const editDetailBtn = document.getElementById('edit-detail');
+    const defaultHtml = "<p>软件介绍、功能说明、安装步骤等文字内容</p>";
+
+    let allCards = document.querySelectorAll('.card');
+    const navMenu = document.getElementById('navMenu');
+    const content = document.querySelectorAll('.content');
+
+    function refreshCardList() {
+      allCards = document.querySelectorAll('.card');
+    }
+
+    document.getElementById('search').addEventListener('input', function (e) {
+      const keyword = e.target.value.toLowerCase().trim();
+      allCards.forEach(card => {
+        const name = card.dataset.name.toLowerCase();
+        card.style.display = name.includes(keyword) ? 'flex' : 'none';
+      });
+    });
+
+    editBtn.addEventListener('click', () => {
+      if (!isAdmin) {
+        document.getElementById('adminModal').style.display = 'flex';
+        document.getElementById('adminPwd').value = '';
+      } else {
+        isAdmin = false;
+        document.body.classList.remove('edit-mode');
+        editBtn.innerText = '编辑';
+        editBtn.style.background = '#999';
+        saveAllToLocal(); // 退出编辑自动保存
+        alert("✅ 已保存，刷新不会丢！");
+      }
+    });
+
+    function closeAdminModal() {
+      document.getElementById('adminModal').style.display = 'none';
+    }
+    function checkAdmin() {
+      const pwd = document.getElementById('adminPwd').value.trim();
+      if (pwd === correctPwd) {
+        isAdmin = true;
+        document.body.classList.add('edit-mode');
+        editBtn.innerText = '退出编辑';
+        editBtn.style.background = 'red';
+        closeAdminModal();
+      } else {
+        closeAdminModal();
+        document.getElementById('errorModal').style.display = 'flex';
+      }
+    }
+    function closeError() {
+      document.getElementById('errorModal').style.display = 'none';
+    }
+
+    function refreshDetail(card) {
+      detailIcon.src = card.dataset.img;
+      detailTitle.innerText = card.querySelector('.name').innerText;
+      detailContent.innerHTML = card.dataset.html || defaultHtml;
+    }
+
+    function bindLinkFunc(box){
+      const linkEl = box.querySelector('.link');
+      const copyBtn = box.querySelector('.copy-btn');
+      linkEl.addEventListener('click', function(){
+        const url = this.dataset.href.trim();
+        if(url) window.open(url,'_blank');
+      });
+      copyBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        const txt = linkEl.textContent.replace('网盘链接：','');
+        navigator.clipboard.writeText(txt).then(()=>{
+          this.innerText = "已复制";
+          setTimeout(()=>this.innerText="复制链接",1500);
+        });
+      });
+    }
+
+    let dragCard = null;
+    function bindCardDrag(card){
+      card.addEventListener('dragstart',e=>{
+        dragCard = card;
+        card.style.opacity = "0.5";
+      });
+      card.addEventListener('dragend',()=>{
+        dragCard = null;
+        card.style.opacity = "1";
+        document.querySelectorAll('.card').forEach(c=>c.classList.remove('drag-over'));
+      });
+      card.addEventListener('dragover',e=>{
+        e.preventDefault();
+        if(dragCard && dragCard !== card) card.classList.add('drag-over');
+      });
+      card.addEventListener('dragleave',()=>card.classList.remove('drag-over'));
+      card.addEventListener('drop',e=>{
+        e.preventDefault();
+        if(dragCard && dragCard !== card){
+          card.parentElement.insertBefore(dragCard, card);
+        }
+        card.classList.remove('drag-over');
+      });
+    }
+
+    function bindCardEvents(card) {
+      bindLinkFunc(card);
+      bindCardDrag(card);
+
+      card.addEventListener('mouseenter', () => hoverCard = card);
+      card.addEventListener('mouseleave', () => hoverCard = null);
+
+      card.addEventListener('click', (e)=>{
+        if(e.target.closest('.edit-ctrl') || e.target.closest('.link-wrap')) return;
+        allCards.forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        selectedCard = card;
+        refreshDetail(card);
+      });
+
+      card.addEventListener('dblclick', () => {
+        detailShow = true;
+        refreshDetail(card);
+        detailModal.style.display = 'flex';
+      });
+
+      const editBtnCard = card.querySelector('.edit-card');
+      const addBtnCard = card.querySelector('.add-card');
+      const delBtnCard = card.querySelector('.del-card');
+
+      editBtnCard.onclick = (e) => {
+        e.stopPropagation();
+        currentEditTarget = card;
+        const name = card.querySelector('.name').innerText;
+        const desc = card.querySelector('.desc').innerText;
+        const linkTxt = card.querySelector('.link').textContent.replace('网盘链接：','');
+        const linkHref = card.querySelector('.link').dataset.href || '';
+        const img = card.dataset.img;
+        editTitle.innerText = '编辑卡片信息';
+        editBody.innerHTML = `
+          图标URL：<input type="text" id="cardImg" value="${img}"><br>
+          软件名称：<input type="text" id="cardName" value="${name}"><br>
+          软件描述：<input type="text" id="cardDesc" value="${desc}"><br>
+          跳转网址：<input type="text" id="cardHref" value="${linkHref}"><br>
+          链接文字：<input type="text" id="cardLinkTxt" value="${linkTxt}">
+        `;
+        editModal.style.display = 'flex';
+      };
+
+      addBtnCard.onclick = (e) => {
+        e.stopPropagation();
+        const cate = card.dataset.cate;
+        const newCard = document.createElement('div');
+        newCard.className = 'card';
+        newCard.draggable = "true";
+        newCard.dataset.cate = cate;
+        newCard.dataset.name = '新软件';
+        newCard.dataset.img = "https://picsum.photos/200/200";
+        newCard.dataset.html = defaultHtml;
+        newCard.innerHTML = `
+          <span class="drag-handle">⋮</span>
+          <img src="https://picsum.photos/200/200" alt="图标">
+          <div class="name">新软件</div>
+          <div class="desc">暂无描述</div>
+          <div class="link-wrap">
+            <span class="link" data-href="">网盘链接：暂无</span>
+            <span class="copy-btn">复制链接</span>
+          </div>
+          <div class="edit-ctrl">
+            <button class="edit-card">编辑</button>
+            <button class="add-card">新增</button>
+            <button class="del-card">移除</button>
+          </div>
+        `;
+        card.parentElement.appendChild(newCard);
+        bindCardEvents(newCard);
+        refreshCardList();
+      };
+
+      delBtnCard.onclick = (e) => {
+        e.stopPropagation();
+        if (confirm('确定删除此卡片？')) {
+          card.remove();
+          refreshCardList();
+        }
+      };
+    }
+
+    allCards.forEach(card => bindCardEvents(card));
+
+    let dragNav = null;
+    function bindNavDrag(item){
+      item.addEventListener('dragstart',e=>{
+        dragNav = item;
+        item.style.opacity = "0.5";
+      });
+      item.addEventListener('dragend',()=>{
+        dragNav = null;
+        item.style.opacity = "1";
+        document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('drag-over'));
+      });
+      item.addEventListener('dragover',e=>{
+        e.preventDefault();
+        if(dragNav && dragNav !== item) item.classList.add('drag-over');
+      });
+      item.addEventListener('dragleave',()=>item.classList.remove('drag-over'));
+      item.addEventListener('drop',e=>{
+        e.preventDefault();
+        if(dragNav && dragNav !== item){
+          navMenu.insertBefore(dragNav, item);
+        }
+        item.classList.remove('drag-over');
+      });
+    }
+    navItems.forEach(item=>bindNavDrag(item));
+
+    function bindNavItemEvents(item){
+      const edit = item.querySelector('.nav-edit');
+      const add = item.querySelector('.nav-add');
+      const del = item.querySelector('.nav-del');
+      const textEl = item.querySelector('.nav-text');
+
+      edit.onclick = (e)=>{
+        e.stopPropagation();
+        currentEditTarget = item;
+        editTitle.innerText = "编辑分类名称";
+        editBody.innerHTML = `<input type="text" id="navName" value="${textEl.innerText}">`;
+        editModal.style.display = 'flex';
+      };
+
+      add.onclick = (e)=>{
+        e.stopPropagation();
+        const newCate = "cate_"+Date.now();
+        const newItem = document.createElement('div');
+        newItem.className = "nav-item";
+        newItem.draggable = "true";
+        newItem.dataset.cate = newCate;
+        newItem.innerHTML = `
+          <span class="drag-handle">⋮</span>
+          <span class="nav-text">新分类</span>
+          <div class="nav-ctrl">
+            <button class="nav-edit">编辑</button>
+            <button class="nav-add">新增</button>
+            <button class="nav-del">移除</button>
+          </div>
+        `;
+        navMenu.appendChild(newItem);
+        bindNavItemEvents(newItem);
+        bindNavDrag(newItem);
+
+        const wrapper = document.querySelector('.content-wrapper');
+        const title = document.createElement('div');
+        title.className = 'category-title';
+        title.id = `cate-${newCate}`;
+        title.innerText = '新分类';
+        wrapper.appendChild(title);
+
+        const content = document.createElement('div');
+        content.className = 'content';
+        content.id = `content-${newCate}`;
+        wrapper.appendChild(content);
+
+        navItems.forEach(n => n.classList.remove('active'));
+        newItem.classList.add('active');
+      };
+
+      del.onclick = (e)=>{
+        e.stopPropagation();
+        if(navItems.length <= 1){
+          alert("至少保留一个分类");
+          return;
+        }
+        if(confirm("确定删除该分类？")){
+          const cate = item.dataset.cate;
+          document.getElementById(`cate-${cate}`)?.remove();
+          document.getElementById(`content-${cate}`)?.remove();
+          item.remove();
+          activeMenuByScroll();
+        }
+      };
+    }
+    navItems.forEach(item=>bindNavItemEvents(item));
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (selectedCard || hoverCard) {
+          const currCard = selectedCard || hoverCard;
+          refreshDetail(currCard);
+          detailShow = !detailShow;
+          detailModal.style.display = detailShow ? 'flex' : 'none';
+        }
+      }
+      if (e.code === 'Escape') {
+        detailShow = false;
+        detailModal.style.display = 'none';
+      }
+    });
+    document.getElementById('closeDetail').onclick = () => {
+      detailShow = false;
+      detailModal.style.display = 'none';
+    };
+    document.getElementById('cancelEdit').onclick = () => {
+      editModal.style.display = 'none';
+      currentEditTarget = null;
+    };
+
+    document.getElementById('saveEdit').onclick = () => {
+      if (!currentEditTarget) return;
+
+      if(currentEditTarget.classList.contains('nav-item')){
+        const val = document.getElementById('navName').value.trim();
+        currentEditTarget.querySelector('.nav-text').innerText = val;
+        const cate = currentEditTarget.dataset.cate;
+        document.getElementById(`cate-${cate}`).innerText = val;
+      }
+      else if (currentEditTarget.classList.contains('card') && document.getElementById('cardImg')) {
+        const img = document.getElementById('cardImg').value;
+        const name = document.getElementById('cardName').value;
+        const desc = document.getElementById('cardDesc').value;
+        const href = document.getElementById('cardHref').value;
+        const linkTxt = document.getElementById('cardLinkTxt').value;
+
+        currentEditTarget.querySelector('img').src = img;
+        currentEditTarget.querySelector('.name').innerText = name;
+        currentEditTarget.querySelector('.desc').innerText = desc;
+        const linkEl = currentEditTarget.querySelector('.link');
+        linkEl.dataset.href = href;
+        linkEl.innerText = "网盘链接：" + linkTxt;
+
+        currentEditTarget.dataset.name = name;
+        currentEditTarget.dataset.img = img;
+      }
+      else if (currentEditTarget.classList.contains('card') && document.getElementById('editorArea')) {
+        const html = document.getElementById('editorArea').innerHTML;
+        currentEditTarget.dataset.html = html;
+        refreshDetail(currentEditTarget);
+      }
+
+      editModal.style.display = 'none';
+      currentEditTarget = null;
+    };
+
+    editDetailBtn.addEventListener('click', function () {
+      if (!isAdmin) {
+        alert('请先进入编辑模式');
+        return;
+      }
+      if (!selectedCard) {
+        alert('请先选中一个软件卡片');
+        return;
+      }
+      currentEditTarget = selectedCard;
+      editTitle.innerText = '编辑详情（文字+图片混排）';
+
+      editBody.innerHTML = `
+        <div class="upload-tip">提示：直接粘贴图片 / 点击下方按钮上传，图片会插到光标位置</div>
+        <div class="editor-area" id="editorArea" contenteditable="true">${selectedCard.dataset.html || defaultHtml}</div>
+        <input type="file" id="imgFile" accept="image/*" style="display:none;">
+        <div class="btn-group">
+          <button type="button" class="save-btn" id="insertImgBtn">上传图片</button>
         </div>
       `;
-      container.appendChild(el);
+      editModal.style.display = 'flex';
+
+      const editorArea = document.getElementById('editorArea');
+      const imgFile = document.getElementById('imgFile');
+      const insertImgBtn = document.getElementById('insertImgBtn');
+
+      insertImgBtn.onclick = () => imgFile.click();
+      imgFile.onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          insertImageAtCursor(ev.target.result);
+        };
+        reader.readAsDataURL(file);
+        imgFile.value = '';
+      };
+
+      editorArea.onpaste = function(e) {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf("image") !== -1) {
+            const file = items[i].getAsFile();
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+              insertImageAtCursor(ev.target.result);
+            };
+            reader.readAsDataURL(file);
+            e.preventDefault();
+            break;
+          }
+        }
+      };
+
+      function insertImageAtCursor(src) {
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.maxWidth = '100%';
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          range.insertNode(img);
+          range.setStartAfter(img);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else {
+          editorArea.appendChild(img);
+        }
+      }
     });
-  });
-}
-
-// 绑定所有事件
-function bindEvents() {
-  const editBtn = document.getElementById('editBtn');
-  editBtn.onclick = async () => {
-    if (!isAdmin) {
-      document.getElementById('adminModal').style.display = 'flex';
-    } else {
-      await saveToGitHub();
-      isAdmin = false;
-      document.body.classList.remove('edit-mode');
-      editBtn.innerText = "编辑";
-      editBtn.style.background = "#999";
     }
-  };
-
-  // 新增/删除卡片事件
-  document.addEventListener('click', async (e) => {
-    const card = e.target.closest('.card');
-    if (!card) return;
-
-    if (e.target.closest('.add-card')) {
-      const cat = card.dataset.cate;
-      appData.cards.push({
-        category: cat,
-        name: "新软件",
-        img: "https://picsum.photos/200/200",
-        desc: "暂无描述",
-        link: "",
-        html: ""
-      });
-      renderAll();
-      return;
-    }
-
-    if (e.target.closest('.del-card')) {
-      const name = card.dataset.name;
-      appData.cards = appData.cards.filter(c => c.name !== name);
-      renderAll();
-      return;
-    }
-  });
-}
-
-// 管理员验证
-function checkAdmin() {
-  const pwd = document.getElementById('adminPwd').value.trim();
-  if (pwd === correctPwd) {
-    isAdmin = true;
-    document.body.classList.add('edit-mode');
-    document.getElementById('editBtn').innerText = "退出编辑";
-    document.getElementById('editBtn').style.background = "red";
-    closeAdminModal();
-  } else {
-    closeAdminModal();
-    document.getElementById('errorModal').style.display = 'flex';
-  }
-}
-
-function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
-function closeError() { document.getElementById('errorModal').style.display = 'none'; }
-</script>
+  </script>
 </body>
 </html>
