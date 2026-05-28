@@ -5,332 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>软件库</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Microsoft YaHei", sans-serif;
-    }
-
-    body {
-      background: #f5f7fa;
-      min-height: 100vh;
-    }
-
-    .top-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: #fff;
-      z-index: 9999;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      padding: 10px 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .search {
-      width: 400px;
-      padding: 10px 15px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
-    }
-
-    .edit-btn {
-      position: absolute;
-      right: 20px;
-      padding: 8px 16px;
-      background: #999;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .edit-btn:hover {
-      background: red;
-    }
-
-    .nav-menu {
-      width: 160px;
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 15px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: calc(100vh - 80px);
-      position: fixed;
-      top: 80px;
-      left: calc(50% - 540px - 160px - 20px);
-      overflow-y: auto;
-      z-index: 999;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      background: #f9f9f9;
-      border: 1px solid #eee;
-      transition: 0.2s;
-      position: relative;
-    }
-
-    .nav-item.active {
-      background: #2196F3;
-      color: #fff;
-      border-color: #2196F3;
-    }
-
-    .nav-item:hover:not(.active) {
-      background: #f0f0f0;
-    }
-
-    .drag-handle {
-      cursor: move;
-      color: #999;
-      user-select: none;
-      padding: 0 4px;
-      display: none;
-    }
-    body.edit-mode .drag-handle {
-      display: inline-block;
-    }
-
-    .nav-ctrl {
-      display: flex;
-      gap: 4px;
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      opacity: 0;
-      transition: opacity 0.2s;
-      pointer-events: none;
-    }
-    body.edit-mode .nav-item:hover .nav-ctrl {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    .nav-ctrl button {
-      font-size: 11px;
-      padding: 2px 5px;
-      border: none;
-      border-radius: 3px;
-      background: #fff;
-      cursor: pointer;
-      border: 1px solid #ddd;
-    }
-
-    .content-wrapper {
-      width: 1080px;
-      margin: 80px auto 0;
-      padding: 25px;
-      background: #ffffff;
-      border-radius: 20px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.05);
-    }
-
-    .content {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
-    }
-
-    .category-title {
-      font-size: 20px;
-      font-weight: bold;
-      margin: 30px 0 15px;
-      padding-left: 10px;
-      border-left: 4px solid #2196F3;
-    }
-    .category-title:first-child {
-      margin-top: 0;
-    }
-
-    .card {
-      background: #f9f9f9;
-      border-radius: 12px;
-      padding: 15px;
-      text-align: center;
-      transition: 0.2s;
-      cursor: pointer;
-      border: 1px solid #eee;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 12px rgba(0,0,0,0.08);
-    }
-
-    .card.active {
-      border: 2px solid #2196F3;
-    }
-
-    .card .drag-handle {
-      position: absolute;
-      left: 6px;
-      top: 6px;
-      font-size: 16px;
-    }
-
-    .card img {
-      width: 100%;
-      aspect-ratio: 1/1;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 10px;
-    }
-
-    .name {
-      font-weight: bold;
-      font-size: 15px;
-      margin-bottom: 6px;
-    }
-
-    .desc {
-      font-size: 12px;
-      color: #888;
-      margin-bottom: 8px;
-    }
-
-    .link-wrap {
-      position: relative;
-      display: inline-block;
-    }
-    .link {
-      font-size: 12px;
-      color: #0066cc;
-      cursor: pointer;
-    }
-    .copy-btn {
-      position: absolute;
-      right: -45px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 11px;
-      padding: 2px 6px;
-      background: #333;
-      color: #fff;
-      border-radius: 3px;
-      display: none;
-      z-index: 10;
-    }
-    .link-wrap:hover .copy-btn {
-      display: block;
-    }
-
-    .edit-ctrl {
-      display: none;
-      margin-top: 5px;
-      gap: 5px;
-      justify-content: center;
-    }
-    .edit-ctrl button {
-      font-size: 12px;
-      padding: 2px 6px;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-      background: #eee;
-    }
-    body.edit-mode .edit-ctrl {
-      display: flex;
-    }
-
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 99999;
-    }
-
-    .modal-box {
-      background: #fff;
-      width: 800px;
-      max-height: 85vh;
-      padding: 30px;
-      border-radius: 12px;
-      position: relative;
-      overflow-y: auto;
-    }
-
-    .close {
-      position: absolute;
-      right: 15px;
-      top: 15px;
-      width: 30px;
-      height: 30px;
-      background: #999;
-      color: #fff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .close:hover {
-      background: red;
-    }
-
-    .detail-header {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #eee;
-    }
-    .detail-header img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-    .detail-content {
-      line-height: 1.8;
-      font-size: 15px;
-    }
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top:10px;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; }
+    body { background: #f5f7fa; min-height: 100vh; }
+    .top-bar { position: fixed; top: 0; left: 0; width: 100%; background: #fff; z-index: 9999; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 10px 0; display: flex; justify-content: center; align-items: center; }
+    .search { width: 400px; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
+    .edit-btn { position: absolute; right: 20px; padding: 8px 16px; background: #999; color: #fff; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+    .edit-btn:hover { background: red; }
+    .nav-menu { width: 160px; background: #ffffff; border-radius: 16px; padding: 15px 10px; display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 80px); position: fixed; top: 80px; left: calc(50% - 540px - 160px - 20px); overflow-y: auto; z-index: 999; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+    .nav-item { display: flex; align-items: center; gap: 6px; padding: 10px 12px; border-radius: 6px; cursor: pointer; background: #f9f9f9; border: 1px solid #eee; transition: 0.2s; position: relative; }
+    .nav-item.active { background: #2196F3; color: #fff; border-color: #2196F3; }
+    .nav-item:hover:not(.active) { background: #f0f0f0; }
+    .drag-handle { cursor: move; color: #999; user-select: none; padding: 0 4px; display: none; }
+    body.edit-mode .drag-handle { display: inline-block; }
+    .nav-ctrl { display: flex; gap: 4px; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+    body.edit-mode .nav-item:hover .nav-ctrl { opacity: 1; pointer-events: auto; }
+    .nav-ctrl button { font-size: 11px; padding: 2px 5px; border: none; border-radius: 3px; background: #fff; cursor: pointer; border: 1px solid #ddd; }
+    .content-wrapper { width: 1080px; margin: 80px auto 0; padding: 25px; background: #ffffff; border-radius: 20px; box-shadow: 0 0 12px rgba(0,0,0,0.05); }
+    .content { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+    .category-title { font-size: 20px; font-weight: bold; margin: 30px 0 15px; padding-left: 10px; border-left: 4px solid #2196F3; }
+    .category-title:first-child { margin-top: 0; }
+    .card { background: #f9f9f9; border-radius: 12px; padding: 15px; text-align: center; transition: 0.2s; cursor: pointer; border: 1px solid #eee; position: relative; display: flex; flex-direction: column; }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 5px 12px rgba(0,0,0,0.08); }
+    .card.active { border: 2px solid #2196F3; }
+    .card .drag-handle { position: absolute; left: 6px; top: 6px; font-size: 16px; }
+    .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
+    .name { font-weight: bold; font-size: 15px; margin-bottom: 6px; }
+    .desc { font-size: 12px; color: #888; margin-bottom: 8px; }
+    .link-wrap { position: relative; display: inline-block; }
+    .link { font-size: 12px; color: #0066cc; cursor: pointer; }
+    .copy-btn { position: absolute; right: -45px; top: 50%; transform: translateY(-50%); font-size: 11px; padding: 2px 6px; background: #333; color: #fff; border-radius: 3px; display: none; z-index: 10; }
+    .link-wrap:hover .copy-btn { display: block; }
+    .edit-ctrl { display: none; margin-top: 5px; gap: 5px; justify-content: center; }
+    .edit-ctrl button { font-size: 12px; padding: 2px 6px; border: none; border-radius: 3px; cursor: pointer; background: #eee; }
+    body.edit-mode .edit-ctrl { display: flex; }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 99999; }
+    .modal-box { background: #fff; width: 800px; max-height: 85vh; padding: 30px; border-radius: 12px; position: relative; overflow-y: auto; }
+    .close { position: absolute; right: 15px; top: 15px; width: 30px; height: 30px; background: #999; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .close:hover { background: red; }
+    .detail-header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+    .detail-header img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+    .detail-content { line-height: 1.8; font-size: 15px; }
+    .btn-group { display: flex; gap: 10px; justify-content: flex-end; margin-top:10px; }
     .save-btn { background: #2196F3; color: #fff; padding: 6px 14px; border: none; border-radius: 4px; }
     .cancel-btn { background: #999; color: #fff; padding: 6px 14px; border: none; border-radius: 4px; }
-    .editor-area {
-      border: 1px solid #ccc;
-      min-height: 300px;
-      padding: 15px;
-      border-radius: 6px;
-      margin-top: 10px;
-    }
-    .drag-over {
-      border: 2px dashed #2196F3 !important;
-    }
+    .editor-area { border: 1px solid #ccc; min-height: 300px; padding: 15px; border-radius: 6px; margin-top: 10px; }
+    .drag-over { border: 2px dashed #2196F3 !important; }
   </style>
 </head>
-
 <body>
   <div class="top-bar">
     <input type="text" class="search" placeholder="搜索软件名称..." id="search">
@@ -435,8 +156,8 @@ let currentEditTarget = null;
 const correctPwd = "13112708075";
 const defaultHtml = "<p>软件介绍、功能说明、安装步骤等文字内容</p>";
 
-// 初始数据，保证页面不会空屏
-let appData = {
+// 先从本地缓存读取，防止刷新丢失
+let appData = JSON.parse(localStorage.getItem("yuanku_data")) || {
   cards: [
     { category: "design", name: "Adobe Photoshop", img: "https://picsum.photos/200/200", desc: "专业图像编辑软件", link: "xxxx", html: "" },
     { category: "design", name: "Adobe Illustrator", img: "https://picsum.photos/200/201", desc: "矢量图形设计工具", link: "xxxx", html: "" },
@@ -451,12 +172,13 @@ let appData = {
 };
 
 window.addEventListener('load', async () => {
-  await loadFromGitHub();
-  renderAll();
+  renderAll(); // 先渲染本地数据，保证页面不空
+  await loadFromGitHub(); // 后台加载云端数据
+  renderAll(); // 用云端数据更新页面
   bindEvents();
 });
 
-// 从 GitHub Issue 加载数据，失败时用初始数据兜底
+// 从 GitHub Issue 加载数据，失败时保留本地数据
 async function loadFromGitHub() {
   try {
     const res = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues/${GITHUB_CONFIG.issueNumber}`, {
@@ -465,14 +187,16 @@ async function loadFromGitHub() {
     const issue = await res.json();
     if (issue.body && issue.body.trim()) {
       appData = JSON.parse(issue.body);
+      localStorage.setItem("yuanku_data", JSON.stringify(appData)); // 加载成功后同步到本地缓存
     }
   } catch (e) {
-    console.error("云端加载失败，使用本地初始数据", e);
+    console.error("云端加载失败，保留本地数据", e);
   }
 }
 
-// 保存数据到 GitHub Issue
+// 保存数据到 GitHub Issue 和本地缓存
 async function saveToGitHub() {
+  localStorage.setItem("yuanku_data", JSON.stringify(appData)); // 先存本地，保证刷新不丢
   try {
     await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues/${GITHUB_CONFIG.issueNumber}`, {
       method: 'PATCH',
@@ -484,7 +208,7 @@ async function saveToGitHub() {
     });
     alert("✅ 已保存到云端");
   } catch (e) {
-    alert("❌ 云端保存失败");
+    alert("❌ 云端保存失败，数据已保存在本地");
   }
 }
 
