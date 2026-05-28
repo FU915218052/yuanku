@@ -436,12 +436,7 @@ const correctPwd = "13112708075";
 const defaultHtml = "<p>软件介绍、功能说明、安装步骤等文字内容</p>";
 
 let appData = {
-  cards: [
-    { category: "design", name: "Adobe Photoshop", img: "https://picsum.photos/200/200", desc: "专业图像编辑软件", link: "xxxx", html: "" },
-    { category: "design", name: "Adobe Illustrator", img: "https://picsum.photos/200/201", desc: "矢量图形设计工具", link: "xxxx", html: "" },
-    { category: "develop", name: "VS Code", img: "https://picsum.photos/200/202", desc: "轻量强大代码编辑器", link: "暂无", html: "" },
-    { category: "tool", name: "解压工具", img: "https://picsum.photos/200/203", desc: "常用压缩解压软件", link: "xxxx", html: "" }
-  ],
+  cards: [],
   categories: [
     { id: "design", name: "设计类" },
     { id: "develop", name: "开发类" },
@@ -462,7 +457,22 @@ async function loadFromGitHub() {
     });
     const issue = await res.json();
     if (issue.body) appData = JSON.parse(issue.body);
-  } catch (e) {}
+  } catch (e) {
+    // 如果加载失败，用默认数据
+    appData = {
+      cards: [
+        { category: "design", name: "Adobe Photoshop", img: "https://picsum.photos/200/200", desc: "专业图像编辑软件", link: "xxxx", html: "" },
+        { category: "design", name: "Adobe Illustrator", img: "https://picsum.photos/200/201", desc: "矢量图形设计工具", link: "xxxx", html: "" },
+        { category: "develop", name: "VS Code", img: "https://picsum.photos/200/202", desc: "轻量强大代码编辑器", link: "暂无", html: "" },
+        { category: "tool", name: "解压工具", img: "https://picsum.photos/200/203", desc: "常用压缩解压软件", link: "xxxx", html: "" }
+      ],
+      categories: [
+        { id: "design", name: "设计类" },
+        { id: "develop", name: "开发类" },
+        { id: "tool", name: "工具类" }
+      ]
+    };
+  }
 }
 
 async function saveToGitHub() {
@@ -497,7 +507,7 @@ function renderAll() {
         <span class="drag-handle">⋮</span>
         <img src="${card.img}" alt="图标">
         <div class="name">${card.name}</div>
-        <div class="desc">${card.desc}</div>
+        <div class="desc">${card.desc || ''}</div>
         <div class="link-wrap">
           <span class="link" data-href="${card.link||''}">网盘链接：${card.link||'暂无'}</span>
           <span class="copy-btn">复制链接</span>
@@ -526,6 +536,32 @@ function bindEvents() {
       editBtn.style.background = "#999";
     }
   };
+
+  document.addEventListener('click', async (e) => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+
+    if (e.target.closest('.add-card')) {
+      const cat = card.dataset.cate;
+      appData.cards.push({
+        category: cat,
+        name: "新软件",
+        img: "https://picsum.photos/200/200",
+        desc: "暂无描述",
+        link: "",
+        html: ""
+      });
+      renderAll();
+      return;
+    }
+
+    if (e.target.closest('.del-card')) {
+      const name = card.dataset.name;
+      appData.cards = appData.cards.filter(c => c.name !== name);
+      renderAll();
+      return;
+    }
+  });
 }
 
 function checkAdmin() {
@@ -544,32 +580,6 @@ function checkAdmin() {
 
 function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
 function closeError() { document.getElementById('errorModal').style.display = 'none'; }
-
-document.addEventListener('click', async (e) => {
-  const card = e.target.closest('.card');
-  if (!card) return;
-
-  if (e.target.closest('.add-card')) {
-    const cat = card.dataset.cate;
-    appData.cards.push({
-      category: cat,
-      name: "新软件",
-      img: "https://picsum.photos/200/200",
-      desc: "暂无描述",
-      link: "",
-      html: ""
-    });
-    renderAll();
-    return;
-  }
-
-  if (e.target.closest('.del-card')) {
-    const name = card.dataset.name;
-    appData.cards = appData.cards.filter(c => c.name !== name);
-    renderAll();
-    return;
-  }
-});
 </script>
 </body>
 </html>
