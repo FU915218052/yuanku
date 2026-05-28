@@ -973,5 +973,122 @@ const GITHUB_CONFIG = {
   issueNumber: 1,
   token: new String("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").toString()
 };
+let isAdmin = false;
+let appData = {
+  cards: [],
+  categories: []
+};
+
+// 页面加载：先从云端拉取数据
+window.addEventListener('load', () => {
+  loadFromGitHub();
+});
+
+// 从 GitHub Issue 加载数据
+async function loadFromGitHub() {
+  const { owner, repo, issueNumber, token } = GITHUB_CONFIG;
+  const url = `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}`;
+
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `token ${token}` }
+    });
+    const issue = await res.json();
+    if (issue.body) {
+      appData = JSON.parse(issue.body);
+      renderCards(); // 用云端数据渲染界面
+    }
+  } catch (err) {
+    console.error('加载失败，用默认数据', err);
+  }
+}
+
+// 把当前数据保存到 GitHub Issue
+async function saveToGitHub() {
+  const { owner, repo, issueNumber, token } = GITHUB_CONFIG;
+  const url = `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}`;
+
+  try {
+    await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `token ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        body: JSON.stringify(appData, null, 2)
+      })
+    });
+    alert('✅ 数据已保存到云端！');
+  } catch (err) {
+    console.error('保存失败', err);
+    alert('❌ 云端保存失败');
+  }
+}
+
+// 把 appData 里的卡片渲染到页面上（和你现有的界面联动）
+function renderCards() {
+  // 先清空所有卡片容器
+  document.querySelectorAll('.content').forEach(el => el.innerHTML = '');
+
+  // 遍历所有分类，渲染对应卡片
+  appData.categories.forEach(cat => {
+    const container = document.getElementById(`content-${cat.id}`);
+    if (!container) return;
+
+    appData.cards
+      .filter(card => card.category === cat.id)
+      .forEach(card => {
+        const el = createCardEl(card);
+        container.appendChild(el);
+      });
+  });
+}
+
+// 生成卡片 DOM，和你现在的界面格式保持一致
+function createCardEl(card) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.dataset.cate = card.category;
+  div.dataset.name = card.name;
+  div.dataset.img = card.img;
+  div.dataset.html = card.html || '';
+
+  div.innerHTML = `
+    <span class="drag-handle">⋮</span>
+    <img src="${card.img}" alt="图标">
+    <div class="name">${card.name}</div>
+    <div class="desc">${card.desc || ''}</div>
+    <div class="link-wrap">
+      <span class="link" data-href="${card.link || ''}">网盘链接：${card.link || '暂无'}</span>
+      <span class="copy-btn">复制链接</span>
+    </div>
+    <div class="edit-ctrl">
+      <button class="edit-card">编辑</button>
+      <button class="add-card">新增</button>
+      <button class="del-card">移除</button>
+    </div>
+  `;
+  return div;
+}
+
+// 绑定「退出编辑」时的保存逻辑
+document.getElementById('editBtn').addEventListener('click', async () => {
+  if (isAdmin) {
+    await saveToGitHub(); // 退出编辑时自动存到云端
+    isAdmin = false;
+    document.body.classList.remove('edit-mode');
+    document.getElementById('editBtn').innerText = '编辑';
+  } else {
+    const pwd = prompt('请输入管理员密码：');
+    if (pwd === '13112708075') {
+      isAdmin = true;
+      document.body.classList.add('edit-mode');
+      document.getElementById('editBtn').innerText = '退出编辑';
+    } else {
+      alert('密码错误');
+    }
+  }
+});
 </script>
 </html>
